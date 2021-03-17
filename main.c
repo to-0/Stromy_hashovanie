@@ -16,16 +16,40 @@ void preorder(NODE *curr){
     preorder(curr->left);
     preorder(curr->right);
 }
+void write_tree(NODE *n){
+    if(n!=NULL){
+        putchar('(');
+    }
+    if(n==NULL){
+        //putchar(')');
+        return;
+    }
+    printf("%d",n->key);
+    write_tree(n->left);
+    if(n->right == NULL){
+        putchar(')');
+        return;
+    }
+    write_tree(n->right);
+    putchar(')');
+}
 void rotate_right(NODE **n){ //otacam okolo n
     NODE *left_child = (*n)->left; //zoberiem childa
-    NODE *parent_temp = NULL;
     NODE *child_right = left_child->right;
+
     NODE *temp = *n; //ulozim si aj n podla ktoreho idem rotovat
     *n = left_child; //childa posuniem hore
     (*n)->parent = temp->parent;
     (*n)->right  = temp; //parenta doprava
     temp->left =  child_right; //na lavu stranu parenta napojim to co mal child  napravo
+    if(temp->parent!=NULL){ //ak ten node predtym mal nejakeho rodica, musim este z toho rodica napojit
+        if(temp->key < temp->parent->key){
+            temp->parent->left = *n;
+        }
+        else temp->parent->right = *n;
+    }
     temp->parent = *n;
+
 
 }
 void rotate_left(NODE **n){ //otacam okolo
@@ -34,8 +58,14 @@ void rotate_left(NODE **n){ //otacam okolo
     NODE *temp = *n; //ulozim si aj n podla ktoreho idem rotovat
     *n = right_child; //childa posuniem hore namiesto n
     (*n)->parent = temp->parent; //nastavim jeho parenta na parenta toho za ktoreho som ho vymenil
-    (*n)->right  = temp; //predosle n hodim doprava, to bol ten predosly parent
+    (*n)->left  = temp; //predosle n hodim doprava, to bol ten predosly parent
     temp->right =  child_left; //na lavu stranu byvaleho parenta napojim to co mal child  napravo
+    if(temp->parent!=NULL){ //ak ten node predtym mal nejakeho rodica, musim este z toho rodica napojit
+        if(temp->key < temp->parent->key){
+            temp->parent->left = *n;
+        }
+        else temp->parent->right = *n;
+    }
     temp->parent = *n; //nastavim jeho parenta na nove n
 }
 NODE *splay(NODE **n){
@@ -57,27 +87,34 @@ NODE *splay(NODE **n){
                 printf("\n prva rotacia \n");
                 rotate_right(&grandparent);
                 preorder(grandparent);
-
                 rotate_right(&parent);
+                printf("\n druha rotacia \n");
+                preorder(parent);
             }
             else if(parent->key < (*n)->key && grandparent->key < parent->key)//rovno smerom dolava, node n je uplne vpravo
             {
                 rotate_left(&grandparent);
-                preorder(grandparent);
                 printf("\n prva rotacia \n");
+                preorder(grandparent);
                 rotate_left(&parent);
+                printf("\n druha rotacia \n");
+                preorder(parent);
             }
             else if(parent->key > (*n)->key && grandparent->key < parent->key){ //
                 rotate_right(&parent);
-                preorder(grandparent);
                 printf("\n prva rotacia \n");
+                preorder(grandparent);
                 rotate_left(&grandparent);
+                printf("\n druha rotacia \n");
+                preorder(grandparent);
             }
             else{
                 rotate_left(&parent);
-                preorder(grandparent);
                 printf("\n prva rotacia \n");
+                preorder(grandparent);
                 rotate_right(&grandparent);
+                printf("\n druha rotacia \n");
+                preorder(grandparent);
             }
         }
     }
@@ -86,6 +123,9 @@ NODE *splay(NODE **n){
 
 void insert(NODE *cur,NODE **n){
     printf("Root: %d cur:%d\n",root->key,cur->key);
+    if(root==NULL){
+
+    }
     if(cur->key > (*n)->key){ // node je mensi ako sucasny cize idem smerom dolava
         if(cur->left ==NULL) {
             (*n)->parent = cur;
@@ -147,6 +187,8 @@ NODE *generate(){
 int main() {
     root = generate();
     preorder(root);
+    putchar('\n');
+    write_tree(root);
    // rotate_right(&(root->left));
     //putchar('\n');
     //preorder(root);
