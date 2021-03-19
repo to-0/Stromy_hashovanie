@@ -4,35 +4,31 @@
 typedef struct node{
     int key;
     char name[50];
+    char app_name[50];
+    char email[50];
     struct node *left;
     struct node *right;
     struct node *parent;
 }NODE;
 NODE *root = NULL;
-void preorder(NODE *curr){
-    if(curr==NULL)
-        return;
-    printf("%d ",curr->key);
-    preorder(curr->left);
-    preorder(curr->right);
-}
-void write_tree(NODE *n){
+
+void preorder(NODE *n){
     if(n!=NULL){
         putchar('(');
     }
     if(n==NULL){
-        //putchar(')');
+        printf("()");
         return;
     }
     printf("%d",n->key);
-    write_tree(n->left);
-    if(n->right == NULL){
-        putchar(')');
-        return;
-    }
-    write_tree(n->right);
+    putchar(' ');
+    preorder(n->left);
+    putchar(',');
+   preorder(n->right);
     putchar(')');
 }
+
+
 void rotate_right(NODE **n){ //otacam okolo n
     NODE *left_child = (*n)->left; //zoberiem childa
     NODE *child_right = left_child->right;
@@ -42,6 +38,9 @@ void rotate_right(NODE **n){ //otacam okolo n
     (*n)->parent = temp->parent;
     (*n)->right  = temp; //parenta doprava
     temp->left =  child_right; //na lavu stranu parenta napojim to co mal child  napravo
+    if(child_right != NULL){ //este musim prepojit aj podstrom childa ktory tiez priradim
+        child_right->parent = temp;
+    }
     if(temp->parent!=NULL){ //ak ten node predtym mal nejakeho rodica, musim este z toho rodica napojit
         if(temp->key < temp->parent->key){
             temp->parent->left = *n;
@@ -59,7 +58,10 @@ void rotate_left(NODE **n){ //otacam okolo
     *n = right_child; //childa posuniem hore namiesto n
     (*n)->parent = temp->parent; //nastavim jeho parenta na parenta toho za ktoreho som ho vymenil
     (*n)->left  = temp; //predosle n hodim doprava, to bol ten predosly parent
-    temp->right =  child_left; //na lavu stranu byvaleho parenta napojim to co mal child  napravo
+    temp->right = child_left;
+    if(child_left!=NULL){
+        child_left->parent = temp;
+    }
     if(temp->parent!=NULL){ //ak ten node predtym mal nejakeho rodica, musim este z toho rodica napojit
         if(temp->key < temp->parent->key){
             temp->parent->left = *n;
@@ -73,8 +75,8 @@ NODE *splay(NODE **n){
     while((*n)->parent!=NULL){
         NODE *parent;
         parent = (*n)->parent;
-        if((*n)->parent->parent == NULL){ //mam iba jedneho parenta
-            printf("Ma iba jedneho parenta a to:%d\n",(*n)->parent->key);
+        if(parent->parent == NULL){ //mam iba jedneho parenta
+             printf("Ma iba jedneho parenta a to:%d\n",(*n)->parent->key);
             if(parent->key > (*n)->key){ //moj node je nalavo od parenta cize tocim doprava
                 rotate_right(&parent);
             }
@@ -82,115 +84,190 @@ NODE *splay(NODE **n){
         }
         else{ //mam parenta aj grandparenta
             NODE *grandparent = parent->parent;
-            printf("Mam parenta:%d aj grandparenta: %d\n",parent->key,grandparent->key);
-            if(parent->key > (*n)->key && grandparent->key > parent->key){ //rovna ciara smerom doprava, node n je uplne vlavo
-                printf("\n prva rotacia \n");
+             printf("Mam parenta:%d aj grandparenta: %d\n",parent->key,grandparent->key);
+            if(parent->key > (*n)->key && grandparent->key > parent->key){ // takato ciara /, node n je uplne vlavo
+                //printf("2x prava rotacia\n");
+               // printf("\n prva rotacia \n");
                 rotate_right(&grandparent);
-                preorder(grandparent);
+                //preorder(root);
                 rotate_right(&parent);
-                printf("\n druha rotacia \n");
-                preorder(parent);
+                //printf("\n druha rotacia \n");
+                //preorder(root);
             }
-            else if(parent->key < (*n)->key && grandparent->key < parent->key)//rovno smerom dolava, node n je uplne vpravo
+            else if(parent->key < (*n)->key && grandparent->key < parent->key)//takato ciara \ , node n je uplne vpravo
             {
+                //printf("2x lava rotacia\n");
+                //najprv podla grandparenta aby som parenta dostal vyssie a potom az podla parenta tocim
                 rotate_left(&grandparent);
-                printf("\n prva rotacia \n");
-                preorder(grandparent);
+
+                 //printf("\n prva rotacia \n");
+                 //preorder(root);
                 rotate_left(&parent);
                 printf("\n druha rotacia \n");
-                preorder(parent);
+                //preorder(root);
             }
             else if(parent->key > (*n)->key && grandparent->key < parent->key){ //
+                printf("prava lava\n");
+                //zacinam parentom lebo potom do druhej strany chcem tocit ako keby a potrebujem ten moj node mat vyssie
                 rotate_right(&parent);
-                printf("\n prva rotacia \n");
-                preorder(grandparent);
+                //printf("\n prva rotacia \n");
+                //preorder(root);
                 rotate_left(&grandparent);
-                printf("\n druha rotacia \n");
-                preorder(grandparent);
+                //printf("\n druha rotacia \n");
+                //preorder(root);
             }
-            else{
+            else if (parent->key < (*n)->key && grandparent->key> parent->key){
+                printf("lava prava\n");
                 rotate_left(&parent);
-                printf("\n prva rotacia \n");
-                preorder(grandparent);
+                //printf("\n prva rotacia \n");
+                //preorder(root);
                 rotate_right(&grandparent);
-                printf("\n druha rotacia \n");
-                preorder(grandparent);
+                //printf("\n druha rotacia \n");
+                //preorder(root);
             }
         }
     }
     root = *n;
 }
-
-void insert(NODE *cur,NODE **n){
-    printf("Root: %d cur:%d\n",root->key,cur->key);
-    if(root==NULL){
-
+void search(int key,NODE *cur){
+    if(cur!= NULL && cur->key!=key){
+        if(cur->key > key) {
+            if (cur->left == NULL) {
+                printf("No element with key: %d", key);
+                splay(&cur);
+                return;
+            }
+            search(key, cur->left);
+        }
+        else {
+            if(cur->right == NULL){
+                printf("No element with key: %d",key);
+                splay(&cur);
+                return;
+            }
+            search(key,cur->right);
+        }
     }
+    else if(cur != NULL && cur->key==key){
+        printf("App name:%s  Last name:%s Email:%s  Key%d\n",cur->app_name,cur->name, cur->email,cur->key);
+        splay(&cur);
+    }
+
+}
+void insert(NODE *cur,NODE **n){
+    if(root==NULL){
+        root = *n;
+        root->parent = NULL;
+        return;
+    }
+    printf("Root: %d cur:%d\n",root->key,cur->key);
     if(cur->key > (*n)->key){ // node je mensi ako sucasny cize idem smerom dolava
         if(cur->left ==NULL) {
             (*n)->parent = cur;
             cur->left = *n;
-            printf("Before splay:\n");
+            /*printf("Before splay:\n");
             preorder(root);
-            putchar('\n');
+            putchar('\n');*/
             splay(n);
-            printf("After splay:\n");
             preorder(root);
-            putchar('\n');
+            /*printf("After splay:\n");
+            preorder(root);
+            putchar('\n');*/
         }
         else
             insert(cur->left,n);
     }
-    else{
+    else if(cur->key < (*n)->key){
         if(cur->right ==NULL){
             (*n)->parent = cur;
-            printf("Nastavil som parenta %d na cur: %d\n",(*n)->key,cur->key);
+            //printf("Nastavil som parenta %d na cur: %d\n",(*n)->key,cur->key);
             cur->right = *n;
-            printf("Before splay\n");
-            preorder(root);
-            putchar('\n');
+            //printf("Before splay\n");
+            //preorder(root);
+            //putchar('\n');
             splay(n);
-            printf("After splay:\n");
             preorder(root);
-            putchar('\n');
+           // printf("After splay:\n");
+            //preorder(root);
+            //putchar('\n');
         }
         else
             insert(cur->right,n);
     }
 }
-NODE *generate(){
+/*NODE *generate(){
     NODE *n;
     FILE *f = fopen("tree.txt","r");
     if (f==NULL) return NULL;
     char line[50];
     int key;
     while (fscanf(f,"%s %d",line,&key)==2){
-        if(root ==NULL){
-            root = (NODE *)malloc(sizeof(NODE));
-            root->key = key;
-            root->parent = NULL;
-            strcpy(root->name,line);
-            root->left = NULL;
-            root->right = NULL;
-        }
-        else{
-            n = (NODE *)malloc(sizeof(NODE));
-            n->key = key;
-            strcpy(n->name,line);
-            n->left = NULL;
-            n->right = NULL;
-            insert(root,&n);
-        }
+        n = (NODE *)malloc(sizeof(NODE));
+        n->key = key;
+        strcpy(n->name,line);
+        n->left = NULL;
+        n->right = NULL;
+        insert(root,&n);
     }
     return root;
+}*/
+NODE *generate(){
+   NODE *n;
+   FILE *f = fopen("test.txt","r");
+   if (f==NULL) return NULL;
+   char line[150];
+    char temp[50];
+   int key;
+   while (fgets(line,150,f)!=NULL){
+       n = (NODE *)malloc(sizeof(NODE));
+       char *point = strchr(line,',');
+       int i = point-line; //zistim index prvej ciarky
+       int length = strlen(line);
+       strncpy(temp,line,i);
+       int key;
+       sscanf(temp,"%d",&(n->key));
+       printf("KEy:%d\n",n->key);
+       char *temp_line;
+       strncpy(temp_line,line+i+1,length-i);
+       strncpy(line,line+i+1,length-i); //seknem subor pokracujem iba so zvyskom
+
+       point = strchr(line,',');
+       i = point-line;
+       length = strlen(line);
+       strncpy(temp,line,i);
+       sscanf(temp,"%s",n->app_name);
+       strncpy(line,line+i+1,length-i);
+
+       point = strchr(line,',');
+       i = point-line;
+       length = strlen(line);
+       strncpy(temp,line,i);
+       sscanf(temp,"%s",n->name);
+       strncpy(line,line+i+1,length-i);
+
+       length = strlen(line);
+       sscanf(line,"%s",n->email);
+       //strncpy(line,line,length);
+
+       n->left = NULL;
+       n->right = NULL;
+       insert(root,&n);
+       //printf("Po insert\n");
+       //preorder(root);
+       //putchar('\n');
+   }
+   return root;
 }
 int main() {
-    root = generate();
+   root = generate();
+   preorder(root);
+   putchar('\n');
+   search(20,root);
+   preorder(root);
+    search(55,root);
     preorder(root);
-    putchar('\n');
-    write_tree(root);
-   // rotate_right(&(root->left));
-    //putchar('\n');
-    //preorder(root);
-    return 0;
+  // rotate_right(&(root->left));
+   //putchar('\n');
+   //preorder(root);
+   return 0;
 }
