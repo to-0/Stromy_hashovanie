@@ -1,7 +1,12 @@
+//
+// Created by tomas on 20. 3. 2021.
+//
+
+#include "splay_tree.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-typedef struct node{
+/*typedef struct node{
     int key;
     char name[50];
     char app_name[50];
@@ -9,7 +14,7 @@ typedef struct node{
     struct node *left;
     struct node *right;
     struct node *parent;
-}NODE;
+}NODE;*/
 NODE *root = NULL;
 
 void preorder(NODE *n){
@@ -24,7 +29,7 @@ void preorder(NODE *n){
     putchar(' ');
     preorder(n->left);
     putchar(',');
-   preorder(n->right);
+    preorder(n->right);
     putchar(')');
 }
 
@@ -76,7 +81,7 @@ NODE *splay(NODE **n){
         NODE *parent;
         parent = (*n)->parent;
         if(parent->parent == NULL){ //mam iba jedneho parenta
-             printf("Ma iba jedneho parenta a to:%d\n",(*n)->parent->key);
+            printf("Ma iba jedneho parenta a to:%d\n",(*n)->parent->key);
             if(parent->key > (*n)->key){ //moj node je nalavo od parenta cize tocim doprava
                 rotate_right(&parent);
             }
@@ -84,10 +89,10 @@ NODE *splay(NODE **n){
         }
         else{ //mam parenta aj grandparenta
             NODE *grandparent = parent->parent;
-             printf("Mam parenta:%d aj grandparenta: %d\n",parent->key,grandparent->key);
+            printf("Mam parenta:%d aj grandparenta: %d\n",parent->key,grandparent->key);
             if(parent->key > (*n)->key && grandparent->key > parent->key){ // takato ciara /, node n je uplne vlavo
                 //printf("2x prava rotacia\n");
-               // printf("\n prva rotacia \n");
+                // printf("\n prva rotacia \n");
                 rotate_right(&grandparent);
                 //preorder(root);
                 rotate_right(&parent);
@@ -100,8 +105,8 @@ NODE *splay(NODE **n){
                 //najprv podla grandparenta aby som parenta dostal vyssie a potom az podla parenta tocim
                 rotate_left(&grandparent);
 
-                 //printf("\n prva rotacia \n");
-                 //preorder(root);
+                //printf("\n prva rotacia \n");
+                //preorder(root);
                 rotate_left(&parent);
                 printf("\n druha rotacia \n");
                 //preorder(root);
@@ -187,7 +192,7 @@ void insert(NODE *cur,NODE **n){
             //putchar('\n');
             splay(n);
             preorder(root);
-           // printf("After splay:\n");
+            // printf("After splay:\n");
             //preorder(root);
             //putchar('\n');
         }
@@ -196,59 +201,49 @@ void insert(NODE *cur,NODE **n){
     }
 }
 NODE *generate(){
-   NODE *n;
-   FILE *f = fopen("test.txt","r");
-   if (f==NULL) return NULL;
-   char line[150];
+    NODE *n;
+    FILE *f = fopen("test.txt","r");
+    if (f==NULL) return NULL;
+    char line[150];
     char temp[50];
-   int key;
-   while (fgets(line,150,f)!=NULL){
-       n = (NODE *)malloc(sizeof(NODE));
-       char *point = strchr(line,',');
-       int i = point-line; //zistim index prvej ciarky
-       int length = strlen(line);
-       strncpy(temp,line,i);
-       int key;
-       sscanf(temp,"%d",&(n->key));
-       printf("KEy:%d\n",n->key);
-       char *temp_line;
-       strncpy(temp_line,line+i+1,length-i);
-       strncpy(line,line+i+1,length-i); //seknem subor pokracujem iba so zvyskom
+    int key;
+    while (fgets(line,150,f)!=NULL){
+        n = (NODE *)malloc(sizeof(NODE));
+        char *point = strchr(line,',');
+        int i = point-line; //zistim index prvej ciarky
+        int length = strlen(line);
+        strncpy(temp,line,i);
+        int key;
+        sscanf(temp,"%d",&(n->key));
+        printf("KEy:%d\n",n->key);
+        char *temp_line;
+        strncpy(temp_line,line+i+1,length-i);
+        strncpy(line,line+i+1,length-i); //seknem subor pokracujem iba so zvyskom
 
-       point = strchr(line,',');
-       i = point-line;
-       length = strlen(line);
-       strncpy(temp,line,i);
-       sscanf(temp,"%s",n->app_name);
-       strncpy(line,line+i+1,length-i);
+        point = strchr(line,',');
+        i = point-line;
+        length = strlen(line);
+        strncpy(temp,line,i);
+        sscanf(temp,"%s",n->app_name);
+        strncpy(line,line+i+1,length-i);
 
-       point = strchr(line,',');
-       i = point-line;
-       length = strlen(line);
-       strncpy(temp,line,i);
-       sscanf(temp,"%s",n->name);
-       strncpy(line,line+i+1,length-i);
+        point = strchr(line,',');
+        i = point-line;
+        length = strlen(line);
+        strncpy(temp,line,i);
+        sscanf(temp,"%s",n->name);
+        strncpy(line,line+i+1,length-i);
 
-       length = strlen(line);
-       sscanf(line,"%s",n->email);
-       //strncpy(line,line,length);
+        length = strlen(line);
+        sscanf(line,"%s",n->email);
+        //strncpy(line,line,length);
 
-       n->left = NULL;
-       n->right = NULL;
-       insert(root,&n);
-       //printf("Po insert\n");
-       //preorder(root);
-       //putchar('\n');
-   }
-   return root;
-}
-int main() {
-   root = generate();
-   preorder(root);
-   putchar('\n');
-   search(20,root);
-   preorder(root);
-    search(55,root);
-    preorder(root);
-   return 0;
+        n->left = NULL;
+        n->right = NULL;
+        insert(root,&n);
+        //printf("Po insert\n");
+        //preorder(root);
+        //putchar('\n');
+    }
+    return root;
 }
