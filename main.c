@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-typedef struct node{
+#include "splay_tree.h"
+/*typedef struct node{
     int key;
     char name[50];
     char app_name[50];
@@ -165,14 +166,10 @@ void insert(NODE *cur,NODE **n){
         if(cur->left ==NULL) {
             (*n)->parent = cur;
             cur->left = *n;
-            /*printf("Before splay:\n");
-            preorder(root);
-            putchar('\n');*/
+
             splay(n);
             preorder(root);
-            /*printf("After splay:\n");
-            preorder(root);
-            putchar('\n');*/
+
         }
         else
             insert(cur->left,n);
@@ -252,3 +249,4 @@ int main() {
     preorder(root);
    return 0;
 }
+ */

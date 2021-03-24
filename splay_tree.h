@@ -20,6 +20,6 @@ void preorder(NODE *N);
 void rotate_right(NODE **n);
 void rotate_left(NODE **n);
 NODE *splay(NODE **n);
-void search(int key, NODE *cur);
+NODE *search(int key, NODE *cur);
 void insert(NODE *cur, NODE **n);
 NODE *generate();

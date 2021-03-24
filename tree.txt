@@ -1,0 +1,6 @@
+Jozko 32
+Marienka 12
+Adolf 40
+Ignac 5
+Homer 3
+Robert 30

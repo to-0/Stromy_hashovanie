@@ -37,7 +37,6 @@ void preorder(NODE *n){
 void rotate_right(NODE **n){ //otacam okolo n
     NODE *left_child = (*n)->left; //zoberiem childa
     NODE *child_right = left_child->right;
-
     NODE *temp = *n; //ulozim si aj n podla ktoreho idem rotovat
     *n = left_child; //childa posuniem hore
     (*n)->parent = temp->parent;
@@ -53,8 +52,6 @@ void rotate_right(NODE **n){ //otacam okolo n
         else temp->parent->right = *n;
     }
     temp->parent = *n;
-
-
 }
 void rotate_left(NODE **n){ //otacam okolo
     NODE *right_child = (*n)->right; //zoberiem   praveho childa
@@ -76,12 +73,12 @@ void rotate_left(NODE **n){ //otacam okolo
     temp->parent = *n; //nastavim jeho parenta na nove n
 }
 NODE *splay(NODE **n){
-    printf("Idem splayovat: %d\n",(*n)->key);
+    //printf("Idem splayovat: %d\n",(*n)->key);
     while((*n)->parent!=NULL){
         NODE *parent;
         parent = (*n)->parent;
         if(parent->parent == NULL){ //mam iba jedneho parenta
-            printf("Ma iba jedneho parenta a to:%d\n",(*n)->parent->key);
+            //printf("Ma iba jedneho parenta a to:%d\n",(*n)->parent->key);
             if(parent->key > (*n)->key){ //moj node je nalavo od parenta cize tocim doprava
                 rotate_right(&parent);
             }
@@ -89,7 +86,7 @@ NODE *splay(NODE **n){
         }
         else{ //mam parenta aj grandparenta
             NODE *grandparent = parent->parent;
-            printf("Mam parenta:%d aj grandparenta: %d\n",parent->key,grandparent->key);
+            //printf("Mam parenta:%d aj grandparenta: %d\n",parent->key,grandparent->key);
             if(parent->key > (*n)->key && grandparent->key > parent->key){ // takato ciara /, node n je uplne vlavo
                 //printf("2x prava rotacia\n");
                 // printf("\n prva rotacia \n");
@@ -108,11 +105,11 @@ NODE *splay(NODE **n){
                 //printf("\n prva rotacia \n");
                 //preorder(root);
                 rotate_left(&parent);
-                printf("\n druha rotacia \n");
+                //printf("\n druha rotacia \n");
                 //preorder(root);
             }
             else if(parent->key > (*n)->key && grandparent->key < parent->key){ //
-                printf("prava lava\n");
+               // printf("prava lava\n");
                 //zacinam parentom lebo potom do druhej strany chcem tocit ako keby a potrebujem ten moj node mat vyssie
                 rotate_right(&parent);
                 //printf("\n prva rotacia \n");
@@ -122,7 +119,7 @@ NODE *splay(NODE **n){
                 //preorder(root);
             }
             else if (parent->key < (*n)->key && grandparent->key> parent->key){
-                printf("lava prava\n");
+               // printf("lava prava\n");
                 rotate_left(&parent);
                 //printf("\n prva rotacia \n");
                 //preorder(root);
@@ -134,21 +131,21 @@ NODE *splay(NODE **n){
     }
     root = *n;
 }
-void search(int key,NODE *cur){
+NODE *search(int key,NODE *cur){
     if(cur!= NULL && cur->key!=key){
         if(cur->key > key) {
             if (cur->left == NULL) {
-                printf("No element with key: %d", key);
+                printf("No element with key: %d\n", key);
                 splay(&cur);
-                return;
+                return NULL;
             }
             search(key, cur->left);
         }
         else {
             if(cur->right == NULL){
-                printf("No element with key: %d",key);
+                printf("No element with key: %d\n",key);
                 splay(&cur);
-                return;
+                return NULL;
             }
             search(key,cur->right);
         }
@@ -156,8 +153,8 @@ void search(int key,NODE *cur){
     else if(cur != NULL && cur->key==key){
         printf("App name:%s  Last name:%s Email:%s  Key%d\n",cur->app_name,cur->name, cur->email,cur->key);
         splay(&cur);
+        return cur;
     }
-
 }
 void insert(NODE *cur,NODE **n){
     if(root==NULL){
@@ -165,19 +162,11 @@ void insert(NODE *cur,NODE **n){
         root->parent = NULL;
         return;
     }
-    printf("Root: %d cur:%d\n",root->key,cur->key);
     if(cur->key > (*n)->key){ // node je mensi ako sucasny cize idem smerom dolava
         if(cur->left ==NULL) {
             (*n)->parent = cur;
             cur->left = *n;
-            /*printf("Before splay:\n");
-            preorder(root);
-            putchar('\n');*/
             splay(n);
-            preorder(root);
-            /*printf("After splay:\n");
-            preorder(root);
-            putchar('\n');*/
         }
         else
             insert(cur->left,n);
@@ -185,16 +174,8 @@ void insert(NODE *cur,NODE **n){
     else if(cur->key < (*n)->key){
         if(cur->right ==NULL){
             (*n)->parent = cur;
-            //printf("Nastavil som parenta %d na cur: %d\n",(*n)->key,cur->key);
             cur->right = *n;
-            //printf("Before splay\n");
-            //preorder(root);
-            //putchar('\n');
             splay(n);
-            preorder(root);
-            // printf("After splay:\n");
-            //preorder(root);
-            //putchar('\n');
         }
         else
             insert(cur->right,n);
@@ -202,7 +183,7 @@ void insert(NODE *cur,NODE **n){
 }
 NODE *generate(){
     NODE *n;
-    FILE *f = fopen("test.txt","r");
+    FILE *f = fopen("tree2.txt","r");
     if (f==NULL) return NULL;
     char line[150];
     char temp[50];
@@ -215,8 +196,8 @@ NODE *generate(){
         strncpy(temp,line,i);
         int key;
         sscanf(temp,"%d",&(n->key));
-        printf("KEy:%d\n",n->key);
-        char *temp_line;
+        //printf("KEy:%d\n",n->key);
+        char temp_line[50];
         strncpy(temp_line,line+i+1,length-i);
         strncpy(line,line+i+1,length-i); //seknem subor pokracujem iba so zvyskom
 
@@ -245,5 +226,6 @@ NODE *generate(){
         //preorder(root);
         //putchar('\n');
     }
+    preorder(root);
     return root;
 }
